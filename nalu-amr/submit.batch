@@ -25,4 +25,5 @@ echo "Num. threads   = $OMP_NUM_THREADS"
 echo "Working dir    = $PWD"
 
 cp ${hybrid_exec} $(pwd)/nalu_amr_wind
+rm -rf plt* overset
 srun -n ${mpi_ranks} -c 1 --cpu_bind=cores $(pwd)/nalu_amr_wind exwsim.yaml
