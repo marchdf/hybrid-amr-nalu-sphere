@@ -15,7 +15,7 @@ time.cfl              =   1.00         # CFL factor
 #.......................................#
 io.KE_int = -1
 io.line_plot_int = -1
-time.plot_interval            =   10       # Steps between plot files
+time.plot_interval            =   100       # Steps between plot files
 time.checkpoint_interval      =  -5       # Steps between checkpoint files
 
 #¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨#
@@ -44,9 +44,13 @@ geometry.prob_hi        =  48.0 16.0 16.0 # Hi corner coordinates
 
 geometry.is_periodic    =   0   1   1   # Periodicity x y z (0/1)
 
-tagging.labels = sr
-tagging.sr.type = CartBoxRefinement
-tagging.sr.static_refinement_def = static_box.txt
+tagging.labels = static qc
+tagging.static.type = CartBoxRefinement
+tagging.static.static_refinement_def = static_box.txt
+
+tagging.qc.type = QCriterionRefinement
+tagging.qc.nondim = true
+tagging.qc.values = 1.0 1.0 1.0 1.0 1.0 1.0
 
 incflo.delp             =   0.  0.  0.  # Prescribed (cyclic) pressure gradient
 
