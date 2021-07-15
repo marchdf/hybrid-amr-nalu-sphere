@@ -33,7 +33,7 @@ realms:
 
     equation_systems:
       name: theEqSys
-      max_iterations: 1
+      max_iterations: 2
       decoupled_overset_solve: yes
 
       solver_system_specification:
@@ -129,7 +129,7 @@ realms:
     post_processing:
      - type: surface
        physics: surface_force_and_moment
-       output_file_name: overset/forces.dat
+       output_file_name: forces.dat
        frequency: 1
        parameters: [0,0]
        target_name: wall
@@ -156,7 +156,6 @@ Time_Integrators:
       time_stepping_type: fixed
       time_step_count: 0
       second_order_accuracy: yes
-      nonlinear_iterations: 4
 
       realms:
         - sphere

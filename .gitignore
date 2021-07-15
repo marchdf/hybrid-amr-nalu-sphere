@@ -2,3 +2,6 @@ plt*
 chk*
 *.o*
 *.log
+forces.dat
+overset/
+__pycache__
