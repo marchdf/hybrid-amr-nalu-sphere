@@ -88,15 +88,6 @@ realms:
             wall_parts: [ wall ]
             ovset_parts: [ overset ]
 
-    mesh_motion:
-      - name: interior
-        mesh_parts: [ sphere-HEX ]
-        motion:
-         - type: rotation
-           omega: 0.0
-           axis: [0.0, 0.0, 1.0]
-           centroid: [1.0, 0.0, 0.0]
-
     solution_options:
       name: myOptions
       turbulence_model: laminar
@@ -134,6 +125,15 @@ realms:
        parameters: [0,0]
        target_name: wall
 
+    turbulence_averaging:
+      time_filter_interval: 100000.0
+
+      specifications:
+        - name: one
+          target_name: [sphere-HEX]
+          compute_q_criterion: yes
+          compute_vorticity: yes
+
     output:
       output_data_base_name: overset/sphere.e
       output_frequency: 100
@@ -145,6 +145,8 @@ realms:
        - mesh_displacement
        - iblank
        - iblank_cell
+       - q_criterion
+       - vorticity
 
 
 Time_Integrators:
