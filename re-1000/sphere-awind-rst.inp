@@ -7,7 +7,7 @@ time.max_step                =   -1          # Max number of time steps
 #¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨#
 #         TIME STEP COMPUTATION         #
 #.......................................#
-time.fixed_dt         =   0.003125     # Use this constant dt if > 0
+time.fixed_dt         =   0.001     # Use this constant dt if > 0
 time.cfl              =   1.00         # CFL factor
 
 #¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨#
@@ -16,6 +16,7 @@ time.cfl              =   1.00         # CFL factor
 io.KE_int = -1
 io.line_plot_int = -1
 io.derived_outputs = q_criterion mag_vorticity
+io.restart_file = "./run1/chk26000"
 time.plot_interval            =   100       # Steps between plot files
 time.checkpoint_interval      =   1000      # Steps between checkpoint files
 
