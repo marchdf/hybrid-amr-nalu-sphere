@@ -5,3 +5,4 @@ chk*
 forces.dat
 overset/
 __pycache__
+.DS_Store
