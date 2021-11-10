@@ -22,7 +22,9 @@ set ds 0.005
 # growth factor for extrusion
 set gf 1.06
 # number of extrusion steps
-set nsteps 60
+set nsteps 75
+# maximum ds for extrusion
+set max_ds 0.05
 
 set _TMP(mode_1) [pw::Application begin Create]
   set _TMP(PW_1) [pw::GridShape create]
@@ -222,6 +224,8 @@ set _TMP(mode_1) [pw::Application begin ExtrusionSolver [list $_BL(1) $_BL(2)]]
   $_BL(2) setExtrusionSolverAttribute SpacingGrowthFactor $gf
   $_BL(1) setExtrusionSolverAttribute NormalInitialStepSize $ds
   $_BL(2) setExtrusionSolverAttribute NormalInitialStepSize $ds
+  $_BL(1) setExtrusionSolverAttribute NormalMaximumStepSize $max_ds
+  $_BL(2) setExtrusionSolverAttribute NormalMaximumStepSize $max_ds
   $_TMP(mode_1) run $nsteps
   pw::Display resetView -Z
   $_TMP(mode_1) run 1
