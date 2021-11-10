@@ -14,6 +14,16 @@ pw::Application markUndoLevel {Select Solver}
 pw::Application setCAESolver {EXODUS II} 3
 pw::Application markUndoLevel {Set Dimension 3D}
 
+# CONTROLS:
+# number of points on cube edge
+set nc 51
+# initial step size for extrusion
+set ds 0.005
+# growth factor for extrusion
+set gf 1.06
+# number of extrusion steps
+set nsteps 60
+
 set _TMP(mode_1) [pw::Application begin Create]
   set _TMP(PW_1) [pw::GridShape create]
   $_TMP(PW_1) delete
@@ -132,7 +142,7 @@ pw::Application markUndoLevel {Create Shape}
 
 set _TMP(PW_1) [pw::Collection create]
 $_TMP(PW_1) set [list $_CN(7) $_CN(3) $_CN(4) $_CN(12) $_CN(11) $_CN(8) $_CN(9) $_CN(10) $_CN(2) $_CN(1) $_CN(6) $_CN(5)]
-$_TMP(PW_1) do setDimension 101
+$_TMP(PW_1) do setDimension $nc
 $_TMP(PW_1) delete
 unset _TMP(PW_1)
 pw::CutPlane refresh
@@ -208,11 +218,11 @@ set _TMP(mode_1) [pw::Application begin ExtrusionSolver [list $_BL(1) $_BL(2)]]
   $_BL(2) setExtrusionSolverAttribute DirectionFlipped 1
   $_BL(1) setExtrusionSolverAttribute Mode NormalAlgebraic
   $_BL(2) setExtrusionSolverAttribute Mode NormalAlgebraic
-  $_BL(1) setExtrusionSolverAttribute SpacingGrowthFactor 1.06
-  $_BL(2) setExtrusionSolverAttribute SpacingGrowthFactor 1.06
-  $_BL(1) setExtrusionSolverAttribute NormalInitialStepSize 0.005
-  $_BL(2) setExtrusionSolverAttribute NormalInitialStepSize 0.005
-  $_TMP(mode_1) run 60
+  $_BL(1) setExtrusionSolverAttribute SpacingGrowthFactor $gf
+  $_BL(2) setExtrusionSolverAttribute SpacingGrowthFactor $gf
+  $_BL(1) setExtrusionSolverAttribute NormalInitialStepSize $ds
+  $_BL(2) setExtrusionSolverAttribute NormalInitialStepSize $ds
+  $_TMP(mode_1) run $nsteps
   pw::Display resetView -Z
   $_TMP(mode_1) run 1
 $_TMP(mode_1) end
