@@ -88,17 +88,30 @@ if __name__ == "__main__":
         tau = diameter / u0
         model = turb_model.upper().replace("_", "-")
         legend_elements += [
-            Line2D([0], [0], lw=2, color=cmap[i], label="Nalu-Wind/AMR-Wind")
+            Line2D([0], [0], lw=2, color=cmap[i], label="Nalu-Wind/AMR-Wind"),
+            Line2D([0], [0], lw=2, color=cmap[i + 1], label="pressure component"),
+            Line2D([0], [0], lw=2, color=cmap[i + 2], label="viscous component"),
         ]
 
-        df = pd.read_csv(os.path.join(fdir, "forces.dat"), delim_whitespace=True,)
+        all_files = glob.glob(os.path.join(fdir, "forces*.dat"))
+        df = pd.concat(
+            (pd.read_csv(f, delim_whitespace=True) for f in all_files)
+        ).sort_values(by="Time", ignore_index=True)
         df["t"] = df.Time / tau
+        df["px"] = df.Fpx / (dynPres * refArea)
+        df["vx"] = df.Fvx / (dynPres * refArea)
         df["cd"] = (df.Fpx + df.Fvx) / (dynPres * refArea)
         df["cl"] = (df.Fpy + df.Fvy) / (dynPres * refArea)
 
         plt.figure("cd")
         p = plt.plot(df["t"], df.cd, lw=2, color=cmap[i])
+        p = plt.plot(df["t"], df.px, lw=2, color=cmap[i + 1])
+        p = plt.plot(df["t"], df.vx, lw=2, color=cmap[i + 2])
         p[0].set_dashes(dashseq[i])
+
+        # plt.figure("cl")
+        # p = plt.plot(df["t"], df.cl, lw=2, color=cmap[i])
+        # p[0].set_dashes(dashseq[i])
 
     # Save the plots
     with PdfPages(fname) as pdf:
@@ -109,8 +122,20 @@ if __name__ == "__main__":
         plt.ylabel(r"$c_D$", fontsize=22, fontweight="bold")
         plt.setp(ax.get_xmajorticklabels(), fontsize=18, fontweight="bold")
         plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight="bold")
-        #plt.xlim([0, 30])
+        # plt.xlim([0, 30])
         plt.ylim([0, 1.0])
         legend = ax.legend(handles=legend_elements, loc="best")
         plt.tight_layout()
         pdf.savefig(dpi=300)
+
+        # plt.figure("cl")
+        # ax = plt.gca()
+        # plt.xlabel(r"$t$", fontsize=22, fontweight="bold")
+        # plt.ylabel(r"$c_L$", fontsize=22, fontweight="bold")
+        # plt.setp(ax.get_xmajorticklabels(), fontsize=18, fontweight="bold")
+        # plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight="bold")
+        # # plt.xlim([0, 30])
+        # plt.ylim([-0.5, 0.5])
+        # legend = ax.legend(handles=legend_elements, loc="best")
+        # plt.tight_layout()
+        # pdf.savefig(dpi=300)
