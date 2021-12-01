@@ -22,7 +22,7 @@ linear_solvers:
     preconditioner: boomerAMG
     tolerance: 1e-5
     max_iterations: 200
-    kspace: 5
+    kspace: 50
     output_level: 0
 
 realms:
@@ -131,10 +131,10 @@ realms:
             velocity: 1.0
 
         - upw_factor:
-            velocity: 1.0
+            velocity: 0.0
 
         - alpha_upw:
-            velocity: 1.0
+            velocity: 0.0
 
         - limiter:
             pressure: no
