@@ -27,7 +27,7 @@ linear_solvers:
 
 realms:
   - name: sphere
-    mesh: ../meshes/sphere_background_300.exo
+    mesh: ../meshes/sphere_300.exo
     use_edges: yes
     automatic_decomposition_type: rcb
 
@@ -52,9 +52,6 @@ realms:
       - constant: ic_1
         target_name:
           - sphere-HEX
-          - background-HEX
-          - background-TETRA
-          - background-PYRAMID
         value:
           pressure: 0.0
           velocity: [1.0,0.0,0.0]
@@ -62,9 +59,6 @@ realms:
     material_properties:
       target_name:
           - sphere-HEX
-          - background-HEX
-          - background-TETRA
-          - background-PYRAMID
       specifications:
         - name: density
           type: constant
@@ -76,33 +70,6 @@ realms:
 
     boundary_conditions:
 
-    - symmetry_boundary_condition: bc_front
-      target_name: front
-      symmetry_user_data:
-
-    - symmetry_boundary_condition: bc_back
-      target_name: back
-      symmetry_user_data:
-
-    - symmetry_boundary_condition: bc_top
-      target_name: top
-      symmetry_user_data:
-
-    - symmetry_boundary_condition: bc_bottom
-      target_name: bottom
-      symmetry_user_data:
-
-    - open_boundary_condition: bc_outlet
-      target_name: outlet
-      open_user_data:
-        velocity: [0,0,0]
-        pressure: 0.0
-
-    - inflow_boundary_condition: bc_inlet
-      target_name: inlet
-      inflow_user_data:
-        velocity: [1.0, 0.0, 0.0]
-
     - wall_boundary_condition: bc_wall
       target_name: wall
       wall_user_data:
@@ -112,15 +79,14 @@ realms:
     - overset_boundary_condition: bc_overset
       overset_connectivity_type: tioga
       overset_user_data:
-        tioga_populate_inactive_part: false
+        mesh_tag_offset: 0
+        tioga_options:
+          set_resolutions: yes
         mesh_group:
           - overset_name: sphere
             mesh_parts: [ sphere-HEX ]
             wall_parts: [ wall ]
             ovset_parts: [ overset ]
-
-          - overset_name: background
-            mesh_parts: [ background-HEX, background-TETRA, background-PYRAMID]
 
     solution_options:
       name: myOptions
@@ -157,16 +123,16 @@ realms:
 
       specifications:
         - name: one
-          target_name: [background-HEX, background-TETRA, background-PYRAMID, sphere-HEX]
+          target_name: [sphere-HEX]
           compute_q_criterion: yes
           compute_vorticity: yes
 
     restart:
-      restart_data_base_name: restart/sphere.rst
+      restart_data_base_name: overset-rst/sphere.rst
       restart_frequency: 1000
 
     output:
-      output_data_base_name: results/sphere.e
+      output_data_base_name: overset/sphere.e
       output_frequency: 100
       output_node_set: no
       output_variables:
@@ -188,7 +154,7 @@ Time_Integrators:
   - StandardTimeIntegrator:
       name: ti_1
       start_time: 0
-      termination_step_count: 20000
+      termination_step_count: 5
       time_step: 0.005
       time_stepping_type: fixed
       time_step_count: 0

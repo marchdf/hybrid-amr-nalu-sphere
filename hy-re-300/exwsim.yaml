@@ -1,0 +1,16 @@
+exawind:
+  nalu_wind_inp:
+    - sphere-nwind.yaml
+  amr_wind_inp: sphere-awind.inp
+  num_timesteps: 20000
+
+  # Variables for overset exchange
+  nalu_vars:
+    - velocity
+    - pressure
+
+  amr_cell_vars:
+    - velocity
+
+  amr_node_vars:
+    - p
