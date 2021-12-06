@@ -1,2 +1,2 @@
-Re,cd,cd_err,cl,cl_err
-300,0.656,3.5e-3,1.6e-2
+Re,cd,cd_err,cl,cl_err,st
+300,0.656,3.5e-3,-0.069,1.6e-2,0.137

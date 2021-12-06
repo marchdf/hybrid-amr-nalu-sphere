@@ -37,8 +37,8 @@ incflo.velocity = 1.0 0.0 0.0
 incflo.density = 1.0
 amr.max_grid_size=64
 
-amr.n_cell              =  64 32 32 # Grid cells at coarsest AMRlevel
-amr.max_level           =  5           # Max AMR level in hierarchy
+amr.n_cell              =  128 64 64 # Grid cells at coarsest AMRlevel
+amr.max_level           =  4           # Max AMR level in hierarchy
 geometry.prob_lo        =  -16.0 -16.0 -16.0 # Lo corner coordinates
 geometry.prob_hi        =  48.0 16.0 16.0 # Hi corner coordinates
 
