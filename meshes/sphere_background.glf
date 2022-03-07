@@ -17,12 +17,17 @@ pw::Application markUndoLevel {Set Dimension 3D}
 # CONTROLS:
 # number of points on cube edge
 set nc 51
-# initial step size for extrusion
+# initial step size for extrusion: 1.13 / (sqrt(Re) * 10)
 set ds 0.005
 # growth factor for extrusion
 set gf 1.06
 # number of extrusion steps
-set nsteps 75
+set mesh_for_nw 1
+if {$mesh_for_nw == 1} {
+   set nsteps 75
+} else {
+   set nsteps 30
+}
 # maximum ds for extrusion
 set max_ds 0.05
 # background mesh spacing near sphere
@@ -241,65 +246,141 @@ unset _TMP(face_1)
 pw::Layer setDescription 0 sphere
 pw::Layer setDescription 1 background
 
-# # Split outer surface sphere domains:
-# # Appended by Pointwise V18.4R2 - Thu Nov 11 08:39:48 2021
-
-# set _DM(7) [pw::GridEntity getByName dom-15]
-# set _DM(8) [pw::GridEntity getByName dom-7]
-# set _DM(9) [pw::GridEntity getByName dom-11]
-# set _DM(10) [pw::GridEntity getByName dom-14]
-# set _DM(11) [pw::GridEntity getByName dom-12]
-# set _CN(1) [pw::GridEntity getByName con-26]
-# set _DM(12) [pw::GridEntity getByName dom-13]
-# set _DM(13) [pw::GridEntity getByName dom-24]
-# set _CN(2) [pw::GridEntity getByName con-27]
-# set _CN(3) [pw::GridEntity getByName con-28]
-# set _CN(4) [pw::GridEntity getByName con-24]
-# set _CN(5) [pw::GridEntity getByName con-25]
-# set _TMP(split_params) [list]
-# lappend _TMP(split_params) [lindex [$_DM(7) closestCoordinate [$_CN(1) getPosition -arc 1]] 1]
-# set _TMP(PW_1) [$_DM(7) split -J $_TMP(split_params)]
-# unset _TMP(PW_1)
-# unset _TMP(split_params)
-# pw::Application markUndoLevel Split
-
-# set _DM(14) [pw::GridEntity getByName dom-15-split-2]
-# set _DM(15) [pw::GridEntity getByName dom-15-split-1]
-# set _TMP(split_params) [list]
-# lappend _TMP(split_params) [lindex [$_DM(14) closestCoordinate [$_CN(4) getPosition -arc 0]] 1]
-# set _TMP(PW_1) [$_DM(14) split -J $_TMP(split_params)]
-# unset _TMP(PW_1)
-# unset _TMP(split_params)
-# pw::Application markUndoLevel Split
-
-# set _DM(16) [pw::GridEntity getByName dom-15-split-2-split-2]
-# set _DM(17) [pw::GridEntity getByName dom-15-split-2-split-1]
-# set _CN(6) [pw::GridEntity getByName con-13]
-# set _CN(7) [pw::GridEntity getByName con-15]
-# set _TMP(split_params) [list]
-# lappend _TMP(split_params) [lindex [$_DM(13) closestCoordinate [$_CN(6) getPosition -arc 0]] 1]
-# set _TMP(PW_1) [$_DM(13) split -J $_TMP(split_params)]
-# unset _TMP(PW_1)
-# unset _TMP(split_params)
-# pw::Application markUndoLevel Split
-
-# set _DM(18) [pw::GridEntity getByName dom-24-split-2]
-# set _DM(19) [pw::GridEntity getByName dom-9]
-# set _DM(20) [pw::GridEntity getByName dom-8]
-# set _CN(8) [pw::GridEntity getByName con-14]
-# set _CN(9) [pw::GridEntity getByName con-16]
-# set _TMP(split_params) [list]
-# lappend _TMP(split_params) [lindex [$_DM(18) closestCoordinate [$_CN(6) getPosition -arc 1]] 1]
-# set _TMP(PW_1) [$_DM(18) split -J $_TMP(split_params)]
-# unset _TMP(PW_1)
-# unset _TMP(split_params)
-# pw::Application markUndoLevel Split
-
 pw::Display isolateLayer 1
 pw::Display showLayer 0
 
+# Create and assign sphere volume
+
+pw::Display showLayer 0
+set background_vc [pw::VolumeCondition create]
+pw::Application markUndoLevel {Create VC}
+
+set _TMP(PW_2) [pw::VolumeCondition create]
+pw::Application markUndoLevel {Create VC}
+
+$background_vc setName background
+pw::Application markUndoLevel {Name VC}
+
+$_TMP(PW_2) setName sphere
+pw::Application markUndoLevel {Name VC}
+
+$background_vc apply [list $_BL(2) $_BL(1)]
+pw::Application markUndoLevel {Set VC}
+
+set _BL(1) [pw::GridEntity getByName blk-1]
+$_TMP(PW_2) apply [list $_BL(1)]
+pw::Application markUndoLevel {Set VC}
+
+set _BL(2) [pw::GridEntity getByName blk-2]
+$_TMP(PW_2) apply [list $_BL(2) $_BL(1)]
+pw::Application markUndoLevel {Set VC}
+unset _TMP(PW_2)
+
+# Create BC
+set _TMP(PW_1) [pw::BoundaryCondition getByName Unspecified]
+set _TMP(PW_2) [pw::BoundaryCondition create]
+pw::Application markUndoLevel {Create BC}
+
+set _TMP(PW_3) [pw::BoundaryCondition getByName bc-2]
+unset _TMP(PW_2)
+set _TMP(PW_4) [pw::BoundaryCondition create]
+pw::Application markUndoLevel {Create BC}
+
+set _TMP(PW_5) [pw::BoundaryCondition getByName bc-3]
+unset _TMP(PW_4)
+set _TMP(PW_6) [pw::BoundaryCondition create]
+pw::Application markUndoLevel {Create BC}
+
+set inlet_bc [pw::BoundaryCondition getByName bc-4]
+unset _TMP(PW_6)
+set _TMP(PW_8) [pw::BoundaryCondition create]
+pw::Application markUndoLevel {Create BC}
+
+set outlet_bc [pw::BoundaryCondition getByName bc-5]
+unset _TMP(PW_8)
+set _TMP(PW_10) [pw::BoundaryCondition create]
+pw::Application markUndoLevel {Create BC}
+
+set front_bc [pw::BoundaryCondition getByName bc-6]
+unset _TMP(PW_10)
+set _TMP(PW_12) [pw::BoundaryCondition create]
+pw::Application markUndoLevel {Create BC}
+
+set back_bc [pw::BoundaryCondition getByName bc-7]
+unset _TMP(PW_12)
+set _TMP(PW_14) [pw::BoundaryCondition create]
+pw::Application markUndoLevel {Create BC}
+
+set top_bc [pw::BoundaryCondition getByName bc-8]
+unset _TMP(PW_14)
+$_TMP(PW_3) setName wall
+pw::Application markUndoLevel {Name BC}
+
+$_TMP(PW_5) setName overset
+pw::Application markUndoLevel {Name BC}
+
+$inlet_bc setName inlet
+pw::Application markUndoLevel {Name BC}
+
+$outlet_bc setName outlet
+pw::Application markUndoLevel {Name BC}
+
+$front_bc setName front
+pw::Application markUndoLevel {Name BC}
+
+$back_bc setName back
+pw::Application markUndoLevel {Name BC}
+
+$top_bc setName top
+pw::Application markUndoLevel {Name BC}
+
+set _TMP(PW_16) [pw::BoundaryCondition create]
+pw::Application markUndoLevel {Create BC}
+
+set bottom_bc [pw::BoundaryCondition getByName bc-9]
+unset _TMP(PW_16)
+$bottom_bc setName bottom
+pw::Application markUndoLevel {Name BC}
+
+$_TMP(PW_3) setPhysicalType -usage CAE {Side Set}
+pw::Application markUndoLevel {Change BC Type}
+
+$_TMP(PW_5) setPhysicalType -usage CAE {Side Set}
+pw::Application markUndoLevel {Change BC Type}
+
+$inlet_bc setPhysicalType -usage CAE {Side Set}
+pw::Application markUndoLevel {Change BC Type}
+
+$outlet_bc setPhysicalType -usage CAE {Side Set}
+pw::Application markUndoLevel {Change BC Type}
+
+$front_bc setPhysicalType -usage CAE {Side Set}
+pw::Application markUndoLevel {Change BC Type}
+
+$back_bc setPhysicalType -usage CAE {Side Set}
+pw::Application markUndoLevel {Change BC Type}
+
+$top_bc setPhysicalType -usage CAE {Side Set}
+pw::Application markUndoLevel {Change BC Type}
+
+$bottom_bc setPhysicalType -usage CAE {Side Set}
+pw::Application markUndoLevel {Change BC Type}
+
+# Assign BC on sphere
+
+$_TMP(PW_3) apply [list [list $_BL(2) $_DM(5)] [list $_BL(1) $_DM(1)] [list $_BL(2) $_DM(4)] [list $_BL(1) $_DM(3)] [list $_BL(1) $_DM(6)] [list $_BL(2) $_DM(2)]]
+pw::Application markUndoLevel {Set BC}
+
+set _DM(9) [pw::GridEntity getByName dom-15]
+set _DM(10) [pw::GridEntity getByName dom-24]
+$_TMP(PW_5) apply [list [list $_BL(1) $_DM(9)] [list $_BL(2) $_DM(10)]]
+pw::Application markUndoLevel {Set BC}
+unset _DM(9)
+unset _DM(10)
+
 # Add blocks around the sphere
-# Appended by Pointwise V18.4R2 - Thu Nov 11 09:20:19 2021
+
+if {$mesh_for_nw == 1} {
 
 set _TMP(mode_1) [pw::Application begin Create]
   set _TMP(PW_1) [pw::Shape create]
@@ -459,150 +540,13 @@ unset _TMP(mode_1)
 unset _TMP(face_1)
 pw::Application markUndoLevel {Extrude, Path}
 
-
-# Create BC and volumes
-# Appended by Pointwise V18.4R2 - Mon Nov 15 08:18:33 2021
-
-pw::Display showLayer 0
-set _TMP(PW_1) [pw::VolumeCondition create]
-pw::Application markUndoLevel {Create VC}
-
-set _TMP(PW_2) [pw::VolumeCondition create]
-pw::Application markUndoLevel {Create VC}
-
-$_TMP(PW_1) setName background
-pw::Application markUndoLevel {Name VC}
-
-$_TMP(PW_2) setName sphere
-pw::Application markUndoLevel {Name VC}
-
-$_TMP(PW_1) apply [list $_BL(2) $_BL(1)]
-pw::Application markUndoLevel {Set VC}
-
-set _BL(1) [pw::GridEntity getByName blk-1]
-$_TMP(PW_2) apply [list $_BL(1)]
-pw::Application markUndoLevel {Set VC}
-
-set _BL(2) [pw::GridEntity getByName blk-2]
-$_TMP(PW_2) apply [list $_BL(2) $_BL(1)]
-pw::Application markUndoLevel {Set VC}
-
-unset _TMP(PW_2)
-unset _TMP(PW_1)
 set _DM(23) [pw::GridEntity getByName dom-31]
 set _DM(24) [pw::GridEntity getByName dom-32]
 set _DM(25) [pw::GridEntity getByName dom-33]
 set _DM(26) [pw::GridEntity getByName dom-34]
 set _DM(27) [pw::GridEntity getByName dom-35]
-set _TMP(PW_1) [pw::BoundaryCondition getByName Unspecified]
-set _TMP(PW_2) [pw::BoundaryCondition create]
-pw::Application markUndoLevel {Create BC}
-
-set _TMP(PW_3) [pw::BoundaryCondition getByName bc-2]
-unset _TMP(PW_2)
-set _TMP(PW_4) [pw::BoundaryCondition create]
-pw::Application markUndoLevel {Create BC}
-
-set _TMP(PW_5) [pw::BoundaryCondition getByName bc-3]
-unset _TMP(PW_4)
-set _TMP(PW_6) [pw::BoundaryCondition create]
-pw::Application markUndoLevel {Create BC}
-
-set _TMP(PW_7) [pw::BoundaryCondition getByName bc-4]
-unset _TMP(PW_6)
-set _TMP(PW_8) [pw::BoundaryCondition create]
-pw::Application markUndoLevel {Create BC}
-
-set _TMP(PW_9) [pw::BoundaryCondition getByName bc-5]
-unset _TMP(PW_8)
-set _TMP(PW_10) [pw::BoundaryCondition create]
-pw::Application markUndoLevel {Create BC}
-
-set _TMP(PW_11) [pw::BoundaryCondition getByName bc-6]
-unset _TMP(PW_10)
-set _TMP(PW_12) [pw::BoundaryCondition create]
-pw::Application markUndoLevel {Create BC}
-
-set _TMP(PW_13) [pw::BoundaryCondition getByName bc-7]
-unset _TMP(PW_12)
-set _TMP(PW_14) [pw::BoundaryCondition create]
-pw::Application markUndoLevel {Create BC}
-
-set _TMP(PW_15) [pw::BoundaryCondition getByName bc-8]
-unset _TMP(PW_14)
-$_TMP(PW_3) setName wall
-pw::Application markUndoLevel {Name BC}
-
-$_TMP(PW_5) setName overset
-pw::Application markUndoLevel {Name BC}
-
-$_TMP(PW_7) setName inlet
-pw::Application markUndoLevel {Name BC}
-
-$_TMP(PW_9) setName outlet
-pw::Application markUndoLevel {Name BC}
-
-$_TMP(PW_11) setName front
-pw::Application markUndoLevel {Name BC}
-
-$_TMP(PW_13) setName back
-pw::Application markUndoLevel {Name BC}
-
-$_TMP(PW_15) setName top
-pw::Application markUndoLevel {Name BC}
-
-set _TMP(PW_16) [pw::BoundaryCondition create]
-pw::Application markUndoLevel {Create BC}
-
-set _TMP(PW_17) [pw::BoundaryCondition getByName bc-9]
-unset _TMP(PW_16)
-$_TMP(PW_17) setName bottom
-pw::Application markUndoLevel {Name BC}
-
-$_TMP(PW_3) setPhysicalType -usage CAE {Side Set}
-pw::Application markUndoLevel {Change BC Type}
-
-$_TMP(PW_5) setPhysicalType -usage CAE {Side Set}
-pw::Application markUndoLevel {Change BC Type}
-
-$_TMP(PW_7) setPhysicalType -usage CAE {Side Set}
-pw::Application markUndoLevel {Change BC Type}
-
-$_TMP(PW_9) setPhysicalType -usage CAE {Side Set}
-pw::Application markUndoLevel {Change BC Type}
-
-$_TMP(PW_11) setPhysicalType -usage CAE {Node Set}
-pw::Application markUndoLevel {Change BC Type}
-
-$_TMP(PW_13) setPhysicalType -usage CAE {Side Set}
-pw::Application markUndoLevel {Change BC Type}
-
-$_TMP(PW_15) setPhysicalType -usage CAE {Side Set}
-pw::Application markUndoLevel {Change BC Type}
-
-$_TMP(PW_17) setPhysicalType -usage CAE {Side Set}
-pw::Application markUndoLevel {Change BC Type}
-
-$_TMP(PW_5) apply [list [list $_BL(1) $_DM(9)] [list $_BL(2) $_DM(10)]]
-pw::Application markUndoLevel {Set BC}
-
-$_TMP(PW_3) apply [list [list $_BL(2) $_DM(5)] [list $_BL(1) $_DM(1)] [list $_BL(2) $_DM(4)] [list $_BL(1) $_DM(3)] [list $_BL(1) $_DM(6)] [list $_BL(2) $_DM(2)]]
-pw::Application markUndoLevel {Set BC}
-
-pw::Display resetView -Z
-unset _TMP(PW_1)
-unset _TMP(PW_3)
-unset _TMP(PW_5)
-unset _TMP(PW_7)
-unset _TMP(PW_9)
-unset _TMP(PW_11)
-unset _TMP(PW_13)
-unset _TMP(PW_15)
-unset _TMP(PW_17)
 
 # Unstructured background block
-# Appended by Pointwise V18.4R2 - Mon Nov 15 09:18:13 2021
-
 set _TMP(mode_1) [pw::Application begin Create]
   set _TMP(PW_1) [pw::GridShape create]
   set _BL(1) [pw::GridEntity getByName blk-3]
@@ -657,40 +601,6 @@ pw::Entity delete [list $_BL(2)]
 pw::Application markUndoLevel Delete
 
 set _TMP(mode_1) [pw::Application begin Create]
-  set _BL(3) [pw::BlockStructured create]
-$_TMP(mode_1) abort
-unset _TMP(mode_1)
-pw::Application setGridPreference Unstructured
-set _TMP(mode_1) [pw::Application begin Create]
-  set _BL(4) [pw::BlockUnstructured create]
-  set _TMP(face_1) [pw::FaceUnstructured create]
-  $_TMP(face_1) addDomain $_DM(31)
-  $_TMP(face_1) addDomain $_DM(32)
-  $_TMP(face_1) addDomain $_DM(29)
-  $_TMP(face_1) addDomain $_DM(33)
-  $_TMP(face_1) addDomain $_DM(30)
-  $_TMP(face_1) addDomain $_DM(28)
-  $_BL(4) addFace $_TMP(face_1)
-  set _TMP(face_2) [pw::FaceUnstructured create]
-  $_TMP(face_2) addDomain $_DM(18)
-  $_TMP(face_2) addDomain $_DM(26)
-  $_TMP(face_2) addDomain $_DM(27)
-  $_TMP(face_2) addDomain $_DM(24)
-  $_TMP(face_2) addDomain $_DM(20)
-  unset _TMP(face_2)
-  unset _TMP(face_1)
-$_TMP(mode_1) abort
-unset _TMP(mode_1)
-set _TMP(mode_1) [pw::Application begin Create]
-  set _BL(5) [pw::BlockUnstructured create]
-  set _TMP(face_1) [pw::FaceUnstructured create]
-  $_TMP(face_1) addDomain $_DM(32)
-  $_TMP(face_1) addDomain $_DM(28)
-  $_TMP(face_1) addDomain $_DM(30)
-  unset _TMP(face_1)
-$_TMP(mode_1) abort
-unset _TMP(mode_1)
-set _TMP(mode_1) [pw::Application begin Create]
   set _BL(6) [pw::BlockUnstructured create]
   set _TMP(face_1) [pw::FaceUnstructured create]
   $_TMP(face_1) addDomain $_DM(31)
@@ -726,3 +636,15 @@ $_TMP(mode_1) end
 unset _TMP(mode_1)
 pw::Application markUndoLevel Solve
 
+# Assign VC and BC
+set _BL(2) [pw::GridEntity getByName blk-4]
+$background_vc apply [list $_BL(1) $_BL(2) $_BL(6)]
+$inlet_bc apply [list [list $_BL(6) $_DM(32)]]
+$top_bc apply [list [list $_BL(6) $_DM(31)]]
+$bottom_bc apply [list [list $_BL(6) $_DM(33)]]
+$outlet_bc apply [list [list $_BL(6) $_DM(30)]]
+$front_bc apply [list [list $_BL(6) $_DM(29)]]
+$back_bc apply [list [list $_BL(6) $_DM(28)]]
+}
+
+pw::Display resetView -Z
