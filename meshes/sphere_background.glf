@@ -15,23 +15,34 @@ pw::Application setCAESolver {EXODUS II} 3
 pw::Application markUndoLevel {Set Dimension 3D}
 
 # CONTROLS:
+
+set mesh_for_nw 0
+
+# growth factor for extrusion
+set gf 1.03
+
+# BL extrusion height
+if {$mesh_for_nw == 1} {
+   set bl_dist 2.5
+} else {
+   set bl_dist 0.5
+}
+
+# For Re = 300
 # number of points on cube edge
 set nc 51
 # initial step size for extrusion: 1.13 / (sqrt(Re) * 10)
 set ds 0.005
-# growth factor for extrusion
-set gf 1.06
-# number of extrusion steps
-set mesh_for_nw 1
-if {$mesh_for_nw == 1} {
-   set nsteps 75
-} else {
-   set nsteps 30
-}
-# maximum ds for extrusion
+# maximum ds for extrusion: max_ds = max_ds_ref sqrt(Re_ref/Re) where, max_ds_ref = 0.05D and Re_ref=300
 set max_ds 0.05
 # background mesh spacing near sphere
 set dx_background 0.08
+
+# # For Re 1000
+# set nc 71
+# set ds 0.0035
+# set max_ds 0.027
+# set dx_background 0.04
 
 set _TMP(mode_1) [pw::Application begin Create]
   set _TMP(PW_1) [pw::GridShape create]
@@ -233,7 +244,8 @@ set _TMP(mode_1) [pw::Application begin ExtrusionSolver [list $_BL(1) $_BL(2)]]
   $_BL(2) setExtrusionSolverAttribute NormalInitialStepSize $ds
   $_BL(1) setExtrusionSolverAttribute NormalMaximumStepSize $max_ds
   $_BL(2) setExtrusionSolverAttribute NormalMaximumStepSize $max_ds
-  $_TMP(mode_1) run $nsteps
+  $_BL(2) setExtrusionSolverAttribute StopAtHeight $bl_dist
+  $_TMP(mode_1) run 1000
   pw::Display resetView -Z
   $_TMP(mode_1) run 1
 $_TMP(mode_1) end
