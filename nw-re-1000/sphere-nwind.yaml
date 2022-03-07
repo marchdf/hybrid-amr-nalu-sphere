@@ -22,18 +22,18 @@ linear_solvers:
     preconditioner: boomerAMG
     tolerance: 1e-5
     max_iterations: 200
-    kspace: 5
+    kspace: 50
     output_level: 0
 
 realms:
   - name: sphere
-    mesh: ../meshes/sphere_background_fine.exo
+    mesh: ../meshes/sphere_background_1000.exo
     use_edges: yes
     automatic_decomposition_type: rcb
 
     equation_systems:
       name: theEqSys
-      max_iterations: 2
+      max_iterations: 4
       decoupled_overset_solve: yes
 
       solver_system_specification:
@@ -53,6 +53,8 @@ realms:
         target_name:
           - sphere-HEX
           - background-HEX
+          - background-TETRA
+          - background-PYRAMID
         value:
           pressure: 0.0
           velocity: [1.0,0.0,0.0]
@@ -61,6 +63,8 @@ realms:
       target_name:
           - sphere-HEX
           - background-HEX
+          - background-TETRA
+          - background-PYRAMID
       specifications:
         - name: density
           type: constant
@@ -116,22 +120,21 @@ realms:
             ovset_parts: [ overset ]
 
           - overset_name: background
-            mesh_parts: [ background-HEX ]
+            mesh_parts: [ background-HEX, background-TETRA, background-PYRAMID]
 
     solution_options:
       name: myOptions
       turbulence_model: laminar
-      projected_timescale_type: momentum_diag_inv
 
       options:
         - hybrid_factor:
             velocity: 1.0
 
         - upw_factor:
-            velocity: 1.0
+            velocity: 0.0
 
         - alpha_upw:
-            velocity: 1.0
+            velocity: 0.0
 
         - limiter:
             pressure: no
@@ -140,12 +143,6 @@ realms:
         - projected_nodal_gradient:
             pressure: element
             velocity: element
-
-        - relaxation_factor:
-            velocity: 0.7
-            pressure: 0.3
-            turbulent_ke: 0.7
-            specific_dissipation_rate: 0.7
 
     post_processing:
      - type: surface
@@ -160,7 +157,7 @@ realms:
 
       specifications:
         - name: one
-          target_name: [background-HEX, sphere-HEX]
+          target_name: [background-HEX, background-TETRA, background-PYRAMID, sphere-HEX]
           compute_q_criterion: yes
           compute_vorticity: yes
 
@@ -180,6 +177,11 @@ realms:
        - iblank_cell
        - q_criterion
        - vorticity
+       - pressure
+       - pressure_force
+       - viscous_force
+       - tau_wall_vector
+       - tau_wall
 
 
 Time_Integrators:
