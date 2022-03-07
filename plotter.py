@@ -96,12 +96,12 @@ if __name__ == "__main__":
         plt.figure(coef)
         p = plt.axhline(row[coef].item(), xmin=0, xmax=30, lw=2, color=cidx, ls="--")
         plt.axhspan(
-            row[coef].item() - row[coef+"_err"].item(),
-            row[coef].item() + row[coef+"_err"].item(),
+            row[coef].item() - row[coef + "_err"].item(),
+            row[coef].item() + row[coef + "_err"].item(),
             facecolor=cidx,
             alpha=0.5,
         )
-        plt.figure(coef+"-spectra")
+        plt.figure(coef + "-spectra")
         p = plt.axvline(row.st.item(), ymin=0, ymax=30, lw=2, color=cidx, ls="--")
 
     cidx = cmap[-2]
@@ -167,7 +167,7 @@ if __name__ == "__main__":
         stats = {}
         for coef in ["cd", "cl", "cs"]:
             stats[coef] = means[coef]
-            stats[coef +"_err"] = df[coef].max() - means[coef]
+            stats[coef + "_err"] = df[coef].max() - means[coef]
 
             plt.figure(coef)
             p = plt.plot(df["t"], df[coef], lw=2, color=cmap[i])
@@ -177,9 +177,9 @@ if __name__ == "__main__":
             yhat = np.abs(yhat[1:])
             fhat = fhat[1:]
             stats[coef + "_st"] = fhat[np.argmax(yhat)]
-            plt.figure(coef+"-spectra")
+            plt.figure(coef + "-spectra")
             p = plt.plot(fhat * tau, yhat, lw=2, color=cmap[i])
-            
+
         wdf = pd.read_csv(os.path.join(fdir, "results", "wall.dat"))
         wdf.phi = 180 - np.fabs(wdf.phi)
         wdf.sort_values(by=["phi"], inplace=True)
