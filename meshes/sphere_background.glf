@@ -38,6 +38,24 @@ set max_ds 0.05
 # background mesh spacing near sphere
 set dx_background 0.08
 
+# # For Re 100
+# set nc 41
+# set ds 0.01
+# set max_ds 0.085
+# set dx_background 0.08
+
+# # For Re 500
+# set nc 61
+# set ds 0.0045
+# set max_ds 0.038
+# set dx_background 0.06
+
+# # For Re 750
+# set nc 65
+# set ds 0.0040
+# set max_ds 0.031
+# set dx_background 0.05
+
 # # For Re 1000
 # set nc 71
 # set ds 0.0035
