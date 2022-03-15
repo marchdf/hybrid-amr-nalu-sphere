@@ -1,17 +1,17 @@
 #!/bin/bash
 
-#SBATCH --job-name=sphere_300
+#SBATCH --job-name=sphere_hybrid
 #SBATCH --account=hfm
-#SBATCH --nodes=6
+#SBATCH --nodes=9
 #SBATCH --time=48:00:00
+##SBATCH --time=00:10:00
+##SBATCH --partition=debug
 #SBATCH -o %x.o%j
-##SBATCH --dependency=afterany:8272896
 
-module purge
 export SPACK_MANAGER=${HOME}/exawind/spack-manager
 source ${SPACK_MANAGER}/start.sh && quick-activate ${SPACK_MANAGER}/environments/exawind
-spack load nalu-wind
-nalu_exec="$(spack location -i nalu-wind)/bin/naluX"
+spack load exawind
+exw_exec="$(spack location -i exawind)/bin/exawind"
 
 ranks_per_node=36
 mpi_ranks=$(expr $SLURM_JOB_NUM_NODES \* $ranks_per_node)
@@ -25,6 +25,5 @@ echo "Num. MPI Ranks = $mpi_ranks"
 echo "Num. threads   = $OMP_NUM_THREADS"
 echo "Working dir    = $PWD"
 
-#cp ${nalu_exec} $(pwd)/naluX
-#srun -n ${mpi_ranks} -c 1 --cpu_bind=cores $(pwd)/naluX -i sphere-nwind.yaml -o sphere-nwind.log
-srun -n ${mpi_ranks} -c 1 --cpu_bind=cores $(pwd)/naluX -i sphere-nwind-rst.yaml -o sphere-nwind-r00.log
+mpirun -n 300 ${exw_exec} --awind 100 --nwind 200 exwsim.yaml
+#mpirun -n 300 ${exw_exec} --awind 100 --nwind 200 exwsim-rst.yaml

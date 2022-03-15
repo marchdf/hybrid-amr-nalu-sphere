@@ -125,7 +125,6 @@ if __name__ == "__main__":
     if rank == 0:
         df = pd.DataFrame(np.vstack(lst), columns=names)
         df["r"] = np.sqrt(df.x ** 2 + df.y ** 2 + df.z ** 2)
-        df["theta"] = np.arccos(df.z / df.r) * 180 / np.pi
-        df["phi"] = np.arctan2(df.y, df.x) * 180 / np.pi
+        df["theta"] = 180 - np.arccos(df.x / df.r) * 180 / np.pi
         wallname = os.path.join(fdir, "wall.dat")
         df.to_csv(wallname, index=False)
