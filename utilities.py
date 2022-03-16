@@ -1,7 +1,9 @@
 """Utilities for scripts."""
 import yaml
 import numpy as np
-from scipy.optimize import fsolve
+
+# from scipy.optimize import fsolve
+from scipy.optimize import brentq
 
 
 def parse_ic(fname):
@@ -67,5 +69,6 @@ def find_symmetry_plane(df):
 
     Do this by finding the angle which sets the side force to zero."""
 
-    angle = fsolve(lambda x: np.mean(np.sin(x) * df.cy + np.cos(x) * df.cz), 0.0)
+    # angle = fsolve(lambda x: np.mean(np.sin(x) * df.cy + np.cos(x) * df.cz), 0.0)
+    angle = brentq(lambda x: np.mean(np.sin(x) * df.cy + np.cos(x) * df.cz), 0, np.pi)
     return angle

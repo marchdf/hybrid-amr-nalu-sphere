@@ -60,86 +60,59 @@ if __name__ == "__main__":
 
     # Reference data
     refdir = os.path.abspath("refdata")
-    expdir = os.path.join(refdir, "fornberg1988")
-    ibdir = os.path.join(refdir, "fadlun2000")
-    jpdir = os.path.join(refdir, "johnson1999")
-    tbdir = os.path.join(refdir, "tomboulides2000")
+    rdf = pd.read_csv(os.path.join(refdir, "data.txt"))
+    print(rdf)
     ngdir = os.path.join(refdir, "nagata2020")
-    gndir = os.path.join(refdir, "goin1968")
 
     # plot stuff
     fname = "plots.pdf"
     legend_elements = []
 
     # Plot reference values
-    cidx = cmap[-1]
-    legend_elements += (Line2D([0], [0], lw=2, color=cidx, label="Johnson (1999)"),)
-    df = pd.read_csv(os.path.join(jpdir, "cd.txt"))
-    Re = 300
-    row = df[df.Re == Re]
-    for coef in ["cd", "cl"]:
-        plt.figure(coef)
-        p = plt.axhline(row[coef].item(), xmin=0, xmax=30, lw=2, color=cidx, ls="--")
-        plt.axhspan(
-            row[coef].item() - row[coef + "_err"].item(),
-            row[coef].item() + row[coef + "_err"].item(),
-            facecolor=cidx,
-            alpha=0.5,
+    grouped = rdf.groupby("ref")
+    for k, (name, group) in enumerate(grouped):
+        plt.figure("cd-re")
+        p = plt.plot(
+            group.Re,
+            group.cd,
+            lw=0,
+            color=cmap[-1],
+            linestyle="None",
+            marker=markertype[k],
+            ms=10,
+            label=name,
         )
-        plt.figure(coef + "-spectra")
-        p = plt.axvline(row.st.item(), ymin=0, ymax=30, lw=2, color=cidx, ls="--")
+        for coef in ["cd", "cl"]:
+            plt.figure(coef + "-spectra")
+            for st in group.st:
+                if not np.isnan(st):
+                    p = plt.axvline(
+                        st, ymin=0, ymax=30, lw=2, color=cmap[-1], ls="--", label=name
+                    )
 
-    cidx = cmap[-2]
-    df = pd.read_csv(os.path.join(tbdir, "cd.txt"))
-    for Re in df.Re:
-        legend_elements += (
-            Line2D([0], [0], lw=2, color=cidx, label=f"Tomboulides (2000), Re = {Re}"),
-        )
-        plt.figure("cd")
-        row = df[df.Re == Re]
-        p = plt.axhline(row.cd.item(), xmin=0, xmax=30, lw=2, color=cidx, ls="--")
-        plt.axhspan(
-            row.cd.item() - row.cd_err.item(),
-            row.cd.item() + row.cd_err.item(),
-            facecolor=cidx,
-            alpha=0.5,
-        )
-        plt.figure("cd-spectra")
-        p = plt.axvline(row.st.item(), ymin=0, ymax=30, lw=2, color=cidx, ls="--")
-        plt.figure("cl-spectra")
-        p = plt.axvline(row.st.item(), ymin=0, ymax=30, lw=2, color=cidx, ls="--")
-
-    cidx = cmap[-3]
-    legend_elements += (Line2D([0], [0], lw=2, color=cidx, label="Nagata (2020)"),)
-    df = pd.read_csv(os.path.join(ngdir, "cd.txt"))
-    Re = 300
-    plt.figure("cd")
-    row = df[df.Re == Re]
-    p = plt.axhline(row.cd.item(), xmin=0, xmax=30, lw=2, color=cidx, ls="--")
     plt.figure("cp")
     df = pd.read_csv(os.path.join(ngdir, "cp.csv"))
-    p = plt.plot(df.theta, savgol_filter(df.cp, 21, 4), lw=2, color=cidx)
+    p = plt.plot(
+        df.theta,
+        savgol_filter(df.cp, 21, 4),
+        lw=2,
+        color=cmap[-1],
+        label="Nagata (2020), Re=300, Ma=0.3",
+    )
     # p = plt.plot(df.theta, df.cp, lw=2, color=cmap[-1])
     plt.figure("cf")
     df = pd.read_csv(os.path.join(ngdir, "cf.csv"))
-    p = plt.plot(df.theta, savgol_filter(df.cf, 21, 4), lw=2, color=cidx)
+    p = plt.plot(
+        df.theta,
+        savgol_filter(df.cf, 21, 4),
+        lw=2,
+        color=cmap[-1],
+        label="Nagata (2020), Re=300, Ma=0.3",
+    )
     # p = plt.plot(df.theta, df.cf, lw=2, color=cmap[-1])
 
-    cidx = cmap[-4]
-    legend_elements += (Line2D([0], [0], lw=2, color=cidx, label="Goin (1968)"),)
-    df = pd.read_csv(os.path.join(gndir, "cd.txt"))
-    Re = 1000
-    plt.figure("cd")
-    row = df[df.Re == Re]
-    p = plt.axhline(row.cd.item(), xmin=0, xmax=30, lw=2, color=cidx, ls="--")
-    plt.axhspan(
-        row.cd.item() - row.cd_err.item(),
-        row.cd.item() + row.cd_err.item(),
-        facecolor=cidx,
-        alpha=0.5,
-    )
-
     # AMR-Wind/Nalu-Wind data
+    lst = []
     for i, fdir in enumerate(args.fdir):
 
         yname = os.path.join(fdir, "sphere-nwind.yaml")
@@ -148,15 +121,17 @@ if __name__ == "__main__":
         diameter = 1.0
         refArea = np.pi * diameter * diameter / 4.0
         tau = diameter / u0
+        Re = round(u0 / mu)
         model = turb_model.upper().replace("_", "-")
         ename = os.path.join(fdir, "exwsim.yaml")
         is_hybrid = os.path.exists(ename)
         if is_hybrid:
-            lbl = "AMR-Wind + Nalu-Wind"
+            sim = "AMR-Wind + Nalu-Wind"
             rdir = "overset"
         else:
-            lbl = "Nalu-Wind"
+            sim = "Nalu-Wind"
             rdir = "results"
+        lbl = f"{sim}, Re={Re}"
         legend_elements += [
             Line2D([0], [0], lw=2, color=cmap[i], label=lbl),
         ]
@@ -180,12 +155,13 @@ if __name__ == "__main__":
 
         means = df.mean()
         stats = {}
+        stats["Re"] = Re
         for coef in ["cd", "cl", "cs"]:
             stats[coef] = means[coef]
             stats[coef + "_err"] = df[coef].max() - means[coef]
 
             plt.figure(coef)
-            p = plt.plot(df["t"], df[coef], lw=2, color=cmap[i])
+            p = plt.plot(df["t"], df[coef], lw=2, color=cmap[i], label=lbl)
             p[0].set_dashes(dashseq[i])
 
             fhat, yhat = utilities.getFFT(dt, df[coef], normalize=True, window=False)
@@ -193,12 +169,12 @@ if __name__ == "__main__":
             fhat = fhat[1:]
             stats[coef + "_st"] = fhat[np.argmax(yhat)]
             plt.figure(coef + "-spectra")
-            p = plt.plot(fhat * tau, yhat, lw=2, color=cmap[i])
+            p = plt.plot(fhat * tau, yhat, lw=2, color=cmap[i], label=lbl)
 
         wdf = pd.read_csv(os.path.join(fdir, rdir, "wall.dat"))
         wdf.sort_values(by=["theta"], inplace=True)
         wdf["cp"] = wdf.pressure / dynPres
-        wdf["cf"] = wdf.tauw / dynPres
+        wdf["cf"] = wdf.tauwx / dynPres
 
         bins = np.linspace(0, 180, 100)
         group = wdf.groupby(pd.cut(wdf.theta, bins))
@@ -208,17 +184,42 @@ if __name__ == "__main__":
 
         plt.figure("cp")
         # p = plt.plot(wdf.theta, wdf.cp, lw=0, color=cmap[-1], linestyle="None", marker="s", ms=1)
-        p = plt.plot(plot_centers, cp_values, lw=2, color=cmap[i])
+        p = plt.plot(plot_centers, cp_values, lw=2, color=cmap[i], label=lbl)
         p[0].set_dashes(dashseq[i])
 
         plt.figure("cf")
         # p = plt.plot(wdf.theta, wdf.cf, lw=0, color=cmap[-1], linestyle="None", marker="s", ms=1)
-        p = plt.plot(plot_centers, cf_values, lw=2, color=cmap[i])
+        p = plt.plot(plot_centers, cf_values, lw=2, color=cmap[i], label=lbl)
         p[0].set_dashes(dashseq[i])
 
         print(f"""Stats for {fdir}""")
-        print(f"""Symmetry plane is at alpha = {np.degrees(alpha[0])}""")
+        print(f"""Symmetry plane is at alpha = {np.degrees(alpha)}""")
         print(stats)
+        lst.append(stats)
+
+    df = pd.DataFrame(lst)
+    plt.figure("cd-re")
+    p = plt.plot(
+        df.Re,
+        df.cd,
+        lw=0,
+        color=cmap[0],
+        linestyle="None",
+        marker="s",
+        ms=15,
+        label="AMR-Wind + Nalu-Wind",
+    )
+    plt.figure("cl-re")
+    p = plt.plot(
+        df.Re,
+        df.cl,
+        lw=0,
+        color=cmap[0],
+        linestyle="None",
+        marker="s",
+        ms=15,
+        label="AMR-Wind + Nalu-Wind",
+    )
 
     # Save the plots
     with PdfPages(fname) as pdf:
@@ -230,9 +231,9 @@ if __name__ == "__main__":
         plt.setp(ax.get_xmajorticklabels(), fontsize=18, fontweight="bold")
         plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight="bold")
         # plt.xlim([0, 30])
-        plt.ylim([0.4, 0.7])
+        plt.ylim([0.4, 1.1])
         # plt.ylim([0.6, 0.7])
-        legend = ax.legend(handles=legend_elements, loc="best")
+        legend = ax.legend(loc="best")
         plt.tight_layout()
         pdf.savefig(dpi=300)
 
@@ -244,7 +245,7 @@ if __name__ == "__main__":
         plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight="bold")
         # plt.xlim([0, 30])
         # plt.ylim([-0.1, 0])
-        legend = ax.legend(handles=legend_elements, loc="best")
+        legend = ax.legend(loc="best")
         plt.tight_layout()
         pdf.savefig(dpi=300)
 
@@ -256,7 +257,7 @@ if __name__ == "__main__":
         plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight="bold")
         # plt.xlim([0, 30])
         plt.ylim([-0.1, 0.1])
-        legend = ax.legend(handles=legend_elements, loc="best")
+        legend = ax.legend(loc="best")
         plt.tight_layout()
         pdf.savefig(dpi=300)
 
@@ -268,7 +269,7 @@ if __name__ == "__main__":
         plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight="bold")
         plt.xlim([0, 1])
         plt.ylim([0, 2e-3])
-        legend = ax.legend(handles=legend_elements, loc="best")
+        legend = ax.legend(loc="best")
         plt.tight_layout()
         pdf.savefig(dpi=300)
 
@@ -280,7 +281,7 @@ if __name__ == "__main__":
         plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight="bold")
         plt.xlim([0, 1])
         plt.ylim([0, 1e-2])
-        legend = ax.legend(handles=legend_elements, loc="best")
+        legend = ax.legend(loc="best")
         plt.tight_layout()
         pdf.savefig(dpi=300)
 
@@ -292,7 +293,7 @@ if __name__ == "__main__":
         plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight="bold")
         # plt.xlim([0, 30])
         # plt.ylim([0.6, 0.7])
-        legend = ax.legend(handles=legend_elements, loc="best")
+        legend = ax.legend(loc="best")
         plt.tight_layout()
         pdf.savefig(dpi=300)
 
@@ -304,6 +305,32 @@ if __name__ == "__main__":
         plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight="bold")
         # plt.xlim([0, 30])
         # plt.ylim([0.6, 0.7])
-        legend = ax.legend(handles=legend_elements, loc="best")
+        legend = ax.legend(loc="best")
+        plt.tight_layout()
+        pdf.savefig(dpi=300)
+
+        plt.figure("cd-re")
+        ax = plt.gca()
+        plt.xlabel(r"$Re$", fontsize=22, fontweight="bold")
+        plt.ylabel(r"$c_D$", fontsize=22, fontweight="bold")
+        plt.setp(ax.get_xmajorticklabels(), fontsize=18, fontweight="bold")
+        plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight="bold")
+        # plt.xlim([0, 30])
+        # plt.ylim([0.4, 1.1])
+        # plt.ylim([0.6, 0.7])
+        legend = ax.legend(loc="best")
+        plt.tight_layout()
+        pdf.savefig(dpi=300)
+
+        plt.figure("cl-re")
+        ax = plt.gca()
+        plt.xlabel(r"$Re$", fontsize=22, fontweight="bold")
+        plt.ylabel(r"$c_L$", fontsize=22, fontweight="bold")
+        plt.setp(ax.get_xmajorticklabels(), fontsize=18, fontweight="bold")
+        plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight="bold")
+        # plt.xlim([0, 30])
+        # plt.ylim([0.4, 1.1])
+        # plt.ylim([0.6, 0.7])
+        legend = ax.legend(loc="best")
         plt.tight_layout()
         pdf.savefig(dpi=300)
