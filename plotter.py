@@ -206,7 +206,9 @@ if __name__ == "__main__":
         color=cmap[0],
         linestyle="None",
         marker="s",
-        ms=15,
+        ms=10,
+        mew=2,
+        mfc="none",
         label="AMR-Wind + Nalu-Wind",
     )
     plt.figure("cl-re")
@@ -217,7 +219,9 @@ if __name__ == "__main__":
         color=cmap[0],
         linestyle="None",
         marker="s",
-        ms=15,
+        ms=10,
+        mfc="none",
+        mew=2,
         label="AMR-Wind + Nalu-Wind",
     )
 
