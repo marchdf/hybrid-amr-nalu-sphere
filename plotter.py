@@ -71,19 +71,19 @@ if __name__ == "__main__":
     # Plot reference values
     grouped = rdf.groupby("ref")
     for k, (name, group) in enumerate(grouped):
-        plt.figure("cd-re")
-        p = plt.plot(
-            group.Re,
-            group.cd,
-            lw=0,
-            color=cmap[-1],
-            linestyle="None",
-            marker=markertype[k],
-            ms=10,
-            label=name,
-        )
         for coef in ["cd", "cl"]:
-            plt.figure(coef + "-spectra")
+            plt.figure(f"{coef}-re")
+            p = plt.plot(
+                group.Re,
+                group[coef],
+                lw=0,
+                color=cmap[-1],
+                linestyle="None",
+                marker=markertype[k],
+                ms=10,
+                label=name,
+            )
+            plt.figure(f"{coef}-spectra")
             for st in group.st:
                 if not np.isnan(st):
                     p = plt.axvline(
