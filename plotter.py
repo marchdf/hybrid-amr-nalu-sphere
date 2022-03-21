@@ -62,6 +62,7 @@ if __name__ == "__main__":
     refdir = os.path.abspath("refdata")
     rdf = pd.read_csv(os.path.join(refdir, "data.txt"))
     print(rdf)
+    tmdir = os.path.join(refdir, "tomboulides2000")
     ngdir = os.path.join(refdir, "nagata2020")
 
     # plot stuff
@@ -84,12 +85,20 @@ if __name__ == "__main__":
                 label=name,
             )
             plt.figure(f"{coef}-spectra")
-            for st in group.st:
+            for cnt, st in enumerate(group.st):
                 if not np.isnan(st):
+                    Re = group.iloc[cnt].Re
                     p = plt.axvline(
-                        st, ymin=0, ymax=30, lw=2, color=cmap[-1], ls="--", label=name
+                        st,
+                        ymin=0,
+                        ymax=30,
+                        lw=2,
+                        color=cmap[-1],
+                        ls="--",
+                        label=f"{name}, Re = {Re}",
                     )
 
+    # Nagata specific
     plt.figure("cp")
     df = pd.read_csv(os.path.join(ngdir, "cp.csv"))
     p = plt.plot(
@@ -110,6 +119,18 @@ if __name__ == "__main__":
         label="Nagata (2020), Re=300, Ma=0.3",
     )
     # p = plt.plot(df.theta, df.cf, lw=2, color=cmap[-1])
+
+    # Tomboulides specific
+    plt.figure("cp")
+    df = pd.read_csv(os.path.join(tmdir, "cp.csv"))
+    p = plt.plot(
+        df.theta,
+        savgol_filter(df.cp, 21, 4),
+        lw=2,
+        color=cmap[-1],
+        label="Tomboulides (2000), Re=100",
+    )
+    # p = plt.plot(df.theta, df.cp, lw=2, color=cmap[-1])
 
     # AMR-Wind/Nalu-Wind data
     lst = []
