@@ -16,7 +16,7 @@ time.cfl              =   1.00         # CFL factor
 io.KE_int = -1
 io.line_plot_int = -1
 io.derived_outputs = q_criterion mag_vorticity
-time.plot_interval            =   100       # Steps between plot files
+time.plot_interval            =   1000       # Steps between plot files
 time.checkpoint_interval      =   1000      # Steps between checkpoint files
 
 #¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨#

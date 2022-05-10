@@ -2,7 +2,7 @@ exawind:
   nalu_wind_inp:
     - sphere-nwind-rst.yaml
   amr_wind_inp: sphere-awind-rst.inp
-  num_timesteps: 20000
+  num_timesteps: 40000
   additional_picard_iterations: 2
 
   # Variables for overset exchange
