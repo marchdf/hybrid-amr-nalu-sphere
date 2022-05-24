@@ -52,39 +52,41 @@ if {$mesh_for_nw == 1} {
    set bl_dist 0.5
 }
 
-# For Re = 300
-# number of points on cube edge
-set nc 51
-# initial step size for extrusion: 1.13 / (sqrt(Re) * 10)
-set ds 0.005
-# maximum ds for extrusion: max_ds = max_ds_ref sqrt(Re_ref/Re) where, max_ds_ref = 0.05D and Re_ref=300
-set max_ds 0.05
-# background mesh spacing near sphere
-set dx_background 0.08
-
-# # For Re 100
-# set nc 41
-# set ds 0.01
-# set max_ds 0.085
-# set dx_background 0.08
-
-# # For Re 500
-# set nc 61
-# set ds 0.0045
-# set max_ds 0.038
-# set dx_background 0.06
-
-# # For Re 750
-# set nc 65
-# set ds 0.0040
-# set max_ds 0.031
-# set dx_background 0.05
-
-# # For Re 1000
-# set nc 71
-# set ds 0.0035
-# set max_ds 0.027
-# set dx_background 0.04
+set reynolds 300
+if {$reynolds == 300} {
+   # number of points on cube edge
+   set nc 51
+   # initial step size for extrusion: 1.13 / (sqrt(Re) * 10)
+   set ds 0.005
+   # maximum ds for extrusion: max_ds = max_ds_ref sqrt(Re_ref/Re) where, max_ds_ref = 0.05D and Re_ref=300
+   set max_ds 0.05
+   # background mesh spacing near sphere
+   set dx_background 0.08
+}
+if {$reynolds == 100} {
+   set nc 41
+   set ds 0.01
+   set max_ds 0.085
+   set dx_background 0.08
+}
+if {$reynolds == 500} {
+   set nc 61
+   set ds 0.0045
+   set max_ds 0.038
+   set dx_background 0.06
+}
+if {$reynolds == 750} {
+   set nc 65
+   set ds 0.0040
+   set max_ds 0.031
+   set dx_background 0.05
+}
+if {$reynolds == 1000} {
+   set nc 71
+   set ds 0.0035
+   set max_ds 0.027
+   set dx_background 0.04
+}
 
 set _TMP(mode_1) [pw::Application begin Create]
   set _TMP(PW_1) [pw::GridShape create]
@@ -702,3 +704,15 @@ $back_bc apply [list [list $_BL(6) $_DM(28)]]
 }
 
 pw::Display resetView -Z
+
+set dir /Users/mhenryde/exawind/cases/hybrid-amr-nalu-sphere/meshes
+pw::Application save $dir/sphere-$reynolds.pw
+set _BL(1) [pw::GridEntity getByName blk-1]
+set _BL(2) [pw::GridEntity getByName blk-2]
+set _TMP(mode_1) [pw::Application begin CaeExport [pw::Entity sort [list $_BL(1) $_BL(2)]]]
+  $_TMP(mode_1) initialize -strict -type CAE $dir/sphere-$reynolds.exo
+  $_TMP(mode_1) verify
+  $_TMP(mode_1) write
+$_TMP(mode_1) end
+unset _TMP(mode_1)
+
