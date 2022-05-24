@@ -40,7 +40,7 @@ if __name__ == "__main__":
         type=str,
     )
     parser.add_argument(
-        "--navg", help="Number of times to average", default=10, type=int
+        "--navg", help="Number of times to average", default=40, type=int
     )
     parser.add_argument(
         "--flowthrough", help="Flowthrough time (L/u)", default=1.0, type=float

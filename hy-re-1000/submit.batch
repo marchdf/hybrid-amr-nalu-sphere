@@ -2,7 +2,7 @@
 
 #SBATCH --job-name=sphere_hybrid
 #SBATCH --account=hfm
-#SBATCH --nodes=14
+#SBATCH --nodes=20
 #SBATCH --time=48:00:00
 ##SBATCH --time=00:10:00
 ##SBATCH --partition=debug
@@ -25,5 +25,5 @@ echo "Num. MPI Ranks = $mpi_ranks"
 echo "Num. threads   = $OMP_NUM_THREADS"
 echo "Working dir    = $PWD"
 
-mpirun -n 500 ${exw_exec} --awind 200 --nwind 300 exwsim.yaml
-#mpirun -n 500 ${exw_exec} --awind 200 --nwind 300 exwsim-rst.yaml
+#mpirun -n 720 ${exw_exec} --awind 420 --nwind 300 exwsim.yaml
+mpirun -n 720 ${exw_exec} --awind 420 --nwind 300 exwsim-rst.yaml

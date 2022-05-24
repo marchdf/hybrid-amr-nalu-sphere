@@ -2,7 +2,9 @@ plt*
 chk*
 *.o*
 *.log
-forces.dat
+memusage.dat
+forces*.dat
 overset/
+overset-rst/
 __pycache__
 .DS_Store

@@ -180,6 +180,7 @@ if __name__ == "__main__":
         for coef in ["cd", "cl", "cs"]:
             stats[coef] = means[coef]
             stats[coef + "_err"] = df[coef].max() - means[coef]
+            stats[coef + "_amp"] = df[coef].max() - df[coef].min()
 
             plt.figure(coef)
             p = plt.plot(df["t"], df[coef], lw=2, color=cmap[i], label=lbl)
